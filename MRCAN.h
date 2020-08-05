@@ -14,7 +14,9 @@ class MRCAN
   float spin_ccm;
   float cspind=14.050; //default value for (L,W)=(2,1)
   float cspins=721.75; //default value for (L,W)=(2,1)
-  unsigned long int wt=6;
+  //Edit start
+  unsigned long int wt=0;
+  //Edit end
   unsigned long int wtset=50;
   unsigned long int wspin=1500;
   /*
@@ -43,7 +45,7 @@ class MRCAN
                                    {0x00,0xDA,0x00,0x10,0x00,0x00,0x00,0x1F}},//enable motor
                                   {{0x00,0xDA,0x00,0x19,0x00,0x00,0x00,0x3F}, //set position mode
                                    {0x00,0xDA,0x00,0x12,0x00,0x00,0x01,0x01}, //set acc/dec time to max speed
-                                   {0x00,0xDA,0x00,0x14,0x00,0x00,0x00,0x05}, //set max speed
+                                   {0x00,0xDA,0x00,0x14,0x00,0x00,0x02,0x03}, //set max speed - edit 0x00,0x67 -> 0x02,0x03
                                    {0x00,0xDA,0x00,0x17,0x00,0x00,0x00,0x4F}, //set control mode to absolute
                                    {0x00,0xDA,0x00,0x10,0x00,0x00,0x00,0x1F}}};//enable motor
 
@@ -63,26 +65,33 @@ class MRCAN
                             {0x00,0xDA,0x00,0x11,0x00,0x00,0x00,0x67}};
   byte command_sstop[8]  = {0x00,0xDA,0x00,0x11,0x00,0x00,0x00,0x00};
   
-  
+  //Add start
+  byte command_stop[8] ={0x00,0xDA,0x00,0x30,0x00,0x00,0x00,0x1F};
+
+  byte command_read_speed[8] ={0x00,0xDC,0x00,0xE4,0x00,0x00,0x00,0x00};
+  //Add end
   
   float Rcurve=0;
   float Vdrive=1;
   boolean isStraight=true;
-  boolean readyMove=false;
   boolean settingChanged=true;
   boolean isSpinState=false;
   boolean isReleased=false;
   boolean isInnerParamChanged=false;
   boolean isSpeedMode=false;
   int kind;
-  float param;
+  //Edit start
+  float param=0.0, param2=0.0;
+  //Edit end
   
   
   unsigned long int rxId;
   unsigned char len;
   unsigned char rxBuf[8];
 
-
+public:
+  boolean readyMove=false;
+  
 private:
   void sndMsgBuf(int id, int mode, int len, byte cmd[8]);
   void init_size(float L, float W);
@@ -95,6 +104,7 @@ public:
   
   MRCAN(MCP_CAN* mcp, byte CAN_CS);
   MRCAN(MCP_CAN* mcp, byte CAN_CS, float L, float W);
+  boolean isReadSpeed=false;
   void To_String(char *msg);
   boolean readCommand(String str);
   void sendSettingCommand();
@@ -103,6 +113,11 @@ public:
   void setWaitTime(int waitTime);
   void setSerial(HardwareSerial* pser);
   byte begin(byte speedset, const byte clockset);
+  // Add start
+  boolean sendCANsuccess(int mcpINT);
+  void sendSpeedCommand(int id, byte commands[4][8]);
+  boolean MRCAN::readSpeedMotor(int mcpINT, byte speeds[4]);
+  // Add end
 };
 
 
